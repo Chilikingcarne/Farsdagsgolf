@@ -1,0 +1,832 @@
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Father's Day Championship</title><style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:#101a18;color:#fff}#scene{position:fixed;inset:0;touch-action:none}canvas{display:block}#hud{position:fixed;top:env(safe-area-inset-top,12px);left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:4}.pill{background:#10201cbf;border:1px solid #ffffff38;backdrop-filter:blur(12px);padding:9px 13px;border-radius:12px;font-size:12px;letter-spacing:.07em}.pill b{font-size:14px}#controls{position:fixed;bottom:max(22px,env(safe-area-inset-bottom));left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;z-index:5;pointer-events:none}button{font:inherit;cursor:pointer}#controls button,.action{pointer-events:auto;background:#f5f0e4;color:#15231d;border:0;border-radius:12px;padding:12px 16px;font-weight:700}#instructions{pointer-events:none;max-width:230px;background:#10201cbf;padding:12px;border-radius:12px;font-size:13px;line-height:1.45}#power{height:5px;background:#ffffff55;border-radius:5px;overflow:hidden;margin-top:7px}#power i{display:block;height:100%;width:0;background:#d7c88c}#overlay{position:fixed;inset:0;background:linear-gradient(160deg,#142c26f2,#101c19f5);z-index:10;display:flex;align-items:center;justify-content:center;padding:22px;text-align:center}#panel{max-width:460px;width:100%;padding:25px;border:1px solid #ffffff25;border-radius:20px;background:#ffffff0a}h1{font-family:Georgia,serif;font-size:clamp(29px,7vw,48px);margin:12px 0}h2{font-family:Georgia,serif}p{line-height:1.55;color:#e4e7df}.action{margin:8px 4px;min-width:150px}#score{display:none;position:fixed;inset:0;background:#0d1715ed;z-index:11;padding:60px 22px 22px}table{border-collapse:collapse;width:100%;max-width:480px;margin:auto}td,th{padding:13px;border-bottom:1px solid #ffffff3b;text-align:left}#prize{display:none;position:fixed;inset:0;z-index:8;overflow:hidden;background:radial-gradient(ellipse at 50% 32%,#9a7d51,#332d25 58%,#161b19 100%)}#prize canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}#prizeTitle{position:absolute;top:10%;width:100%;text-align:center;font:clamp(24px,6vw,42px) Georgia,serif;text-shadow:0 2px 15px #000}#prizeButtons{position:absolute;bottom:12%;left:0;right:0;display:flex;justify-content:center;gap:14px}#prizeButtons button{padding:14px;background:#f4e6c9;border:0;border-radius:9px;font-weight:bold}#error{position:fixed;z-index:99;inset:0;background:#18241f;padding:30px;display:none;align-items:center;justify-content:center;text-align:center;line-height:1.7}input{width:100%;padding:10px;border-radius:8px;border:0;margin:8px 0}
+
+#prize{background:radial-gradient(ellipse at 52% 20%,#b6a98d 0%,#766c5b 44%,#33332d 100%)}
+#prize::before{content:"";position:absolute;inset:58% 0 0;background:repeating-linear-gradient(92deg,#574c3f 0px,#625647 6px,#514638 13px,#6c5d4a 23px);box-shadow:inset 0 18px 42px #241f1b80}
+#prize::after{content:"";position:absolute;top:58%;width:100%;height:2px;background:#2b2924aa}
+#prizeTitle{top:7%;z-index:3;font-size:clamp(23px,5.2vw,36px);color:#fff5e6}
+#prizeStage{position:absolute;inset:0;z-index:1;pointer-events:auto}
+#prizeStage svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 16px 12px #16120e50)}
+#prize canvas{z-index:2}
+#prizeButtons{z-index:4;bottom:max(5%,env(safe-area-inset-bottom));gap:10px;padding:0 12px}
+#prizeButtons button{font-size:13px;min-width:0;flex:1;max-width:190px;box-shadow:0 3px 12px #0007}
+
+/* A calm, believable clubhouse award room: wall, moulding, framed landscape and parquet */
+#prize{background:linear-gradient(180deg,#504e43 0%,#8d8776 35%,#b4a68d 57%,#4a3d31 57.2%,#261e1a 100%)}
+#prize::before{content:"";position:absolute;inset:0 0 43%;background:radial-gradient(ellipse at 52% 36%,#e5d7b755,transparent 58%),repeating-linear-gradient(90deg,transparent 0 130px,#fff2d90a 132px 134px);box-shadow:inset 0 -10px 18px #19130f33}
+#prize::after{content:"";position:absolute;inset:57% 0 0;background:repeating-linear-gradient(104deg,#3c3028 0 25px,#544033 27px 29px,#2e2622 31px 54px);transform:perspective(420px) rotateX(24deg);transform-origin:top;box-shadow:inset 0 28px 60px #0d0b0a70}
+#prizeStage{z-index:2}
+#prizeTitle{z-index:5;top:max(7%,env(safe-area-inset-top));font-size:clamp(20px,5vw,34px)}
+#prizeButtons{display:none!important;z-index:6}
+#cardObject{outline:none;transform-box:fill-box;transform-origin:center;transition:filter .2s,transform .2s}
+#cardObject:active,#cardObject:focus{filter:drop-shadow(0 0 10px #ffe4a0);transform:scale(1.045)}
+#cardView{display:none;position:absolute;inset:0;z-index:12;align-items:center;justify-content:center;background:#111b19c9;backdrop-filter:blur(9px);padding:24px}
+#cardView.visible{display:flex}
+#closeCard{position:absolute;right:20px;top:max(20px,env(safe-area-inset-top));background:#fff3dc;color:#382c20;border:0;border-radius:50%;width:44px;height:44px;font-size:22px;z-index:2}
+.openCard{width:min(340px,92vw);min-height:390px;background:linear-gradient(125deg,#e7d6b7,#fffaf0 25%,#f1e4cd 90%);border:8px solid #f7ebd7;border-radius:3px;box-shadow:12px 18px 35px #0009,inset 0 0 0 1px #bdad90;display:flex;align-items:center;justify-content:center;color:#51382f;transform:rotate(-2deg)}
+.cardInner{padding:30px 22px;text-align:center;font-family:Georgia,serif}
+.cardInner .small{font-size:12px;letter-spacing:.24em;color:#88664e}
+.cardHeart{font-size:65px;color:#a9545a;margin:20px 0 5px}
+.cardInner h2{font-size:30px;margin:8px 0 18px}
+.cardInner p{color:#614b40;font-size:17px;line-height:1.6}
+
+/* Outdoor championship awards terrace, behind the actual SVG prize table */
+#prize{background:linear-gradient(180deg,#8fc3df 0%,#d4e8ed 32%,#c2c9ad 43%,#4e7650 44%,#2b5635 58%,#9a9a83 58.3%,#77796a 100%)}
+#prize::before{content:"";position:absolute;inset:0 0 40%;background:radial-gradient(ellipse at 73% 17%,#fff9d18c,transparent 34%),linear-gradient(155deg,transparent 0 50%,#1c42243b 51% 54%,transparent 55%),repeating-linear-gradient(104deg,transparent 0 44px,#193d2518 45px 49px,transparent 50px 80px);box-shadow:none;pointer-events:none}
+#prize::after{content:"";position:absolute;inset:59% 0 0;background:repeating-linear-gradient(96deg,#a5a28e 0 28px,#989681 29px 31px,#b4b09b 32px 60px);transform:perspective(500px) rotateX(17deg);transform-origin:top;box-shadow:inset 0 22px 42px #26352c66;pointer-events:none}
+#prizeTitle{text-shadow:0 2px 10px #18301c,0 1px 2px #000}
+
+/* One continuous outdoor awards scene: no duplicated SVG landscape or floor. */
+#prize{background:linear-gradient(180deg,#84b6d2 0%,#c9e0e4 37%,#a2ba98 45%,#507f51 49%,#37643e 57%,#8e9081 57.3%,#777b70 100%)}
+#prize::before{content:"";position:absolute;inset:0 0 43%;background:radial-gradient(ellipse at 74% 16%,#fff7d477,transparent 36%),linear-gradient(180deg,transparent 68%,#284f3533 100%);box-shadow:none;transform:none;pointer-events:none}
+#prize::after{content:"";position:absolute;inset:57% 0 0;background:repeating-linear-gradient(96deg,#a5a18f 0 31px,#999785 32px 34px,#b3b09d 35px 66px);transform:perspective(500px) rotateX(17deg);transform-origin:top;box-shadow:inset 0 18px 40px #26352c55;pointer-events:none}
+#cardCover{width:min(320px,85vw);height:410px;border:0;border-radius:4px;background:linear-gradient(120deg,#e4d4bb,#fff8eb 40%,#eee0c9);box-shadow:12px 18px 35px #0009,inset 0 0 0 8px #f7ead5;color:#704b44;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transform:rotate(-2deg);font-family:Georgia,serif;cursor:pointer;animation:cardArrive .6s ease-out}#cardCover span{font-size:clamp(20px,6vw,28px);letter-spacing:.06em;max-width:260px}#cardCover strong{font-size:64px;color:#ad4d58}#cardCover em{font:13px system-ui,sans-serif;letter-spacing:.04em;color:#735c4e}#openedCard{display:none;animation:cardArrive .55s ease-out}@keyframes cardArrive{from{opacity:0;transform:translateY(28px) rotate(-6deg) scale(.9)}to{opacity:1;transform:translateY(0) rotate(-2deg) scale(1)}}
+#prize{background:radial-gradient(ellipse at 72% 20%,#fff3bf99,transparent 35%),linear-gradient(180deg,#85b8d4 0%,#dce7dc 43%,#8daa83 51%,#4e8151 52%,#2c633e 100%)}
+#prize::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 25% 60%,#264e34 0%,transparent 38%),radial-gradient(ellipse at 87% 55%,#244a32 0%,transparent 31%);opacity:.4;pointer-events:none;box-shadow:none;transform:none}
+#prize::after{content:"";position:absolute;inset:62% 0 0;background:linear-gradient(180deg,#4d8051,#315f3e);transform:none;box-shadow:inset 0 20px 50px #1b3e2a55;pointer-events:none}
+#prizeStage{z-index:3}#prizeStage svg{filter:none}#prizeTitle{z-index:5}
+
+#playerBadge{max-width:48vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#leaderboard{position:fixed;right:10px;top:calc(env(safe-area-inset-top, 12px) + 78px);width:min(176px,43vw);z-index:4;background:#0c231dc9;border:1px solid #ffffff40;border-radius:9px;backdrop-filter:blur(9px);padding:9px 8px;pointer-events:none;font-size:11px;box-shadow:0 6px 20px #0003}#leaderboard .boardTitle{font-weight:800;letter-spacing:.12em;color:#e8e2c9;margin-bottom:6px;font-size:10px}#leaderboard .boardRow{display:grid;grid-template-columns:17px minmax(0,1fr) 29px;gap:4px;align-items:center;padding:5px 2px;border-bottom:1px solid #ffffff18}#leaderboard .boardRow:last-child{border:0}#leaderboard .boardRow span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#leaderboard .me{background:#e9edcc25;color:#fff7c8;font-weight:800;border-radius:3px}#leaderboard .boardRow span:last-child{text-align:right;font-variant-numeric:tabular-nums}#speedBox{position:fixed;left:50%;bottom:calc(max(22px,env(safe-area-inset-bottom)) + 104px);transform:translateX(-50%);z-index:4;background:#e8f0e8e8;color:#162d2a;padding:6px 13px;text-align:center;min-width:110px;box-shadow:0 4px 16px #0003;border-radius:3px;display:none;pointer-events:none}#speedBox b{display:block;font-size:10px;letter-spacing:.11em}#speedBox span{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums}#playerNameInput{font-size:18px;text-align:center;background:#f9f6ec;color:#18251e;border:2px solid #e5d4aa;padding:13px}#nameError{color:#ffccba;min-height:20px;font-size:13px}@media(max-width:430px){#hud{left:8px;right:8px}.pill{padding:7px 9px;font-size:10px}.pill b{font-size:12px}#leaderboard{top:calc(env(safe-area-inset-top, 12px) + 68px);width:148px;font-size:10px}#leaderboard .boardTitle{font-size:9px}#leaderboard .boardRow{padding:4px 1px}#speedBox{bottom:calc(max(22px,env(safe-area-inset-bottom)) + 115px)}}
+
+/* Tournament TV-style display */
+#hud{justify-content:space-between;align-items:flex-start}
+#hud>div:last-child{gap:7px!important}
+#holeStats{width:min(220px,49vw);padding:12px 13px;text-align:left;background:linear-gradient(125deg,#101e1cdd,#102823e9);border-left:3px solid #d6c48a}
+#holeStats .statsEyebrow{font-size:9px;letter-spacing:.15em;color:#d6c48a;margin-bottom:5px}
+#holeStats b{font-size:clamp(11px,2.8vw,15px);letter-spacing:.04em}
+#holeStats .statsNumbers{display:flex;gap:8px;justify-content:space-between;border-top:1px solid #ffffff45;margin-top:8px;padding-top:8px;font-size:10px;font-weight:700;white-space:nowrap}
+#playerBadge{text-align:right}
+#leaderboard{top:auto;bottom:calc(max(18px,env(safe-area-inset-bottom)) + 16px);right:10px;width:min(186px,43vw);max-height:46vh;overflow:hidden}
+#controls{justify-content:flex-start;bottom:max(18px,env(safe-area-inset-bottom));right:auto;max-width:52vw}
+#extraControls{display:none!important;pointer-events:auto}
+#extraControls.controlsRevealed{display:grid!important}
+#instructions.instructionsGone{display:none!important}
+#speedBox{bottom:calc(max(18px,env(safe-area-inset-bottom)) + 125px);left:38%;font-size:12px}
+@media(max-width:430px){#holeStats{padding:8px}#holeStats .statsNumbers{gap:4px;font-size:9px}#leaderboard{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 8px);width:43vw}#controls button{font-size:12px;padding:10px}#speedBox{left:38%;bottom:calc(max(18px,env(safe-area-inset-bottom)) + 110px)}}
+
+/* Compact tournament broadcast scoreboard */
+#hud{left:10px;right:10px;gap:8px}
+#courseCorner{background:#10201ca8;flex-shrink:1;max-width:37vw}
+#tvScore{width:min(320px,61vw);background:#0c171ae8;color:#fff;border-radius:4px;overflow:hidden;box-shadow:0 6px 24px #0005;border:1px solid #ffffff45;pointer-events:none;font-variant-numeric:tabular-nums}
+.tvTop{display:grid;grid-template-columns:minmax(0,1fr) 91px;min-height:54px}
+.tvName{font-size:clamp(12px,3vw,17px);font-weight:800;letter-spacing:.04em;padding:15px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;align-self:center}
+.tvTotal{background:#f0eee6;color:#18221f;text-align:center;padding:6px 2px;display:flex;flex-direction:column;justify-content:center}
+.tvTotal strong{font-size:24px;line-height:1.1}.tvTotal small{font-size:8px;font-weight:800;letter-spacing:.02em}
+.tvBottom{display:grid;grid-template-columns:1fr 1.5fr 1fr;background:#e8ece9;color:#172620}
+.tvBottom>div{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 3px;border-right:1px solid #bac5bf;gap:3px}
+.tvBottom>div:last-child{border:0}.tvBottom small{font-size:9px;letter-spacing:.09em;font-weight:800}.tvBottom strong{font-size:17px}.tvBottom em{font-style:normal;font-size:10px}
+#leaderboard{width:min(235px,51vw);font-size:11px;padding:9px;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 10px)}
+#leaderboard .boardHead,#leaderboard .boardRow{display:grid;grid-template-columns:18px minmax(0,1fr) 43px 24px;gap:5px;align-items:center}
+#leaderboard .boardHead{font-size:8px;color:#d6d7ce;letter-spacing:.04em;border-bottom:1px solid #ffffff55;padding:5px 2px}
+#leaderboard .boardRow{padding:5px 2px}
+#leaderboard .boardRow span:nth-child(3),#leaderboard .boardRow span:nth-child(4){text-align:right;font-variant-numeric:tabular-nums}
+#leaderboard .boardScore{font-weight:800}
+@media(max-width:430px){#tvScore{width:61vw}.tvTop{grid-template-columns:minmax(0,1fr) 70px;min-height:46px}.tvName{padding:10px 7px;font-size:12px}.tvTotal strong{font-size:21px}.tvTotal small{font-size:7px}.tvBottom strong{font-size:14px}.tvBottom small{font-size:8px}#leaderboard{width:51vw;font-size:10px}}
+
+/* PGA-inspired live broadcast overlay */
+#tvScore{width:min(415px,64vw);background:transparent;border:0;border-radius:0;box-shadow:0 3px 9px #0002;color:#fff;font-family:Arial,Helvetica,sans-serif}
+.tvTop{grid-template-columns:minmax(0,1fr) 64px;min-height:49px;background:#27635c}
+.tvName{font-size:clamp(15px,2.5vw,25px);font-weight:500;letter-spacing:.025em;padding:8px 13px;text-transform:uppercase}
+.tvTotal{background:#a62748;color:white;padding:4px 2px}.tvTotal strong{font-size:25px;font-weight:700}.tvTotal small{display:none}
+.tvBottom{grid-template-columns:29% 35% 36%;background:#d6e0e2e8;color:#25353a;min-height:31px}
+.tvBottom>div{flex-direction:row;gap:4px;border:0;padding:4px 5px}.tvBottom strong{font-size:15px;font-weight:700}.tvBottom .tvStrokes{justify-content:flex-end;gap:9px}.tvStrokes span{font-size:10px;letter-spacing:.03em}
+.tvDistance{background:#f3f6f5ee;color:#33434a;text-align:center;font-size:15px;padding:5px 2px;letter-spacing:.01em}.tvDistance b{font-weight:800}
+#leaderboard{background:#183b38d9;border:0;border-radius:0;backdrop-filter:blur(4px);padding:0;width:min(295px,48vw);font-family:Arial,Helvetica,sans-serif;box-shadow:0 3px 9px #0003}
+#leaderboard .boardTitle{display:none}
+#leaderboard .boardHead{grid-template-columns:18px minmax(0,1fr) 42px 24px;padding:5px 8px;font-size:9px;background:#285b56;color:#eaf4f1;border:0}
+#leaderboard .boardRow{grid-template-columns:18px minmax(0,1fr) 42px 24px;gap:5px;padding:5px 8px;font-size:12px;border:0;color:#fff;font-weight:400}
+#leaderboard .boardRow:nth-child(even){background:#ffffff09}
+#leaderboard .boardRow.me{background:#edf1ef;color:#26383c;font-weight:700;border-radius:0}
+#leaderboard .boardRow span:nth-child(3){background:#a62748;color:white;text-align:center;padding:4px 0;margin:-5px 0;font-weight:700}
+#leaderboard .boardRow span:nth-child(4){text-align:center}
+@media(max-width:430px){#tvScore{width:65vw}.tvTop{grid-template-columns:minmax(0,1fr) 47px;min-height:36px}.tvName{font-size:12px;padding:7px}.tvTotal strong{font-size:19px}.tvBottom{min-height:25px}.tvBottom strong{font-size:11px}.tvBottom>div{padding:3px}.tvStrokes span{font-size:8px}.tvDistance{font-size:11px;padding:4px}#leaderboard{width:49vw}#leaderboard .boardRow{font-size:10px;padding:5px 4px;grid-template-columns:13px minmax(0,1fr) 31px 16px;gap:3px}#leaderboard .boardHead{grid-template-columns:13px minmax(0,1fr) 31px 16px;gap:3px;padding:4px;font-size:7px}#leaderboard .boardRow span:nth-child(3){margin:-5px 0}}
+
+/* Smaller broadcast graphics: preserve the PGA-inspired layout without covering play. */
+#tvScore{width:min(290px,48vw)!important;box-shadow:0 2px 7px #0003}
+.tvTop{grid-template-columns:minmax(0,1fr) 49px!important;min-height:35px!important}
+.tvName{font-size:clamp(11px,1.55vw,16px)!important;padding:5px 8px!important}
+.tvTotal strong{font-size:19px!important}
+.tvBottom{min-height:23px!important}
+.tvBottom>div{padding:3px!important;gap:3px!important}
+.tvBottom strong{font-size:11px!important}
+.tvStrokes span{font-size:8px!important}
+.tvDistance{font-size:11px!important;padding:3px 2px!important}
+#leaderboard{width:min(203px,38vw)!important;max-height:37vh!important}
+#leaderboard .boardHead{grid-template-columns:14px minmax(0,1fr) 34px 18px!important;gap:3px!important;padding:3px 5px!important;font-size:7px!important}
+#leaderboard .boardRow{grid-template-columns:14px minmax(0,1fr) 34px 18px!important;gap:3px!important;padding:3px 5px!important;font-size:10px!important}
+#leaderboard .boardRow span:nth-child(3){margin:-3px 0!important;padding:3px 0!important}
+@media(max-width:430px){#tvScore{width:53vw!important}.tvTop{grid-template-columns:minmax(0,1fr) 40px!important;min-height:30px!important}.tvName{font-size:10px!important;padding:5px!important}.tvTotal strong{font-size:16px!important}.tvBottom strong{font-size:9px!important}.tvStrokes span{font-size:7px!important}.tvDistance{font-size:9px!important}#leaderboard{width:41vw!important;max-height:34vh!important}#leaderboard .boardRow{font-size:8px!important;grid-template-columns:11px minmax(0,1fr) 28px 13px!important;padding:3px!important;gap:2px!important}#leaderboard .boardHead{font-size:6px!important;grid-template-columns:11px minmax(0,1fr) 28px 13px!important;padding:3px!important;gap:2px!important}}
+
+/* Final tournament broadcast board */
+#finalResults{display:none;position:fixed;inset:0;z-index:110;background:linear-gradient(145deg,#112e55,#153d70 53%,#081c36);color:white;overflow:auto;font-family:Arial,Helvetica,sans-serif;padding:clamp(15px,4vw,42px);box-sizing:border-box}
+#finalResults:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;background:repeating-linear-gradient(90deg,transparent 0 95px,#ffffff25 96px 97px)}
+#finalInner{position:relative;max-width:790px;margin:auto}
+#finalBrand{font-family:Georgia,serif;font-weight:900;font-size:clamp(29px,7vw,62px);letter-spacing:.035em;line-height:.96;margin:16px 0 9px}
+#finalSub{letter-spacing:.23em;font-size:11px;color:#d4e7ff;margin-bottom:23px}
+#finalHeading{font-size:clamp(18px,4vw,28px);margin:0 0 8px}
+#finalSummary{color:#d8e8f7;font-size:13px;line-height:1.5;margin-bottom:15px}
+#finalTable{width:100%;border-collapse:collapse;background:#071a2bdf;box-shadow:0 10px 35px #0005;font-size:clamp(11px,2.6vw,16px)}
+#finalTable th{background:#17395c;color:#d6e5f6;text-align:left;font-size:10px;letter-spacing:.09em;padding:11px 8px}
+#finalTable td{padding:11px 8px;border-bottom:1px solid #ffffff1d}
+#finalTable th:nth-child(n+3),#finalTable td:nth-child(n+3){text-align:center}
+#finalTable .finalMe{background:#e8edf1;color:#162a3e;font-weight:800}
+#finalTable .finalScore{background:#a42b48;color:white;font-weight:800}
+#finalActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:19px}
+.finalButton{min-height:49px;border:1px solid #f6f3df;border-radius:5px;padding:12px 18px;background:#e8e4c9;color:#15314d;font-weight:800;cursor:pointer}
+.finalButton.secondary{background:transparent;color:#fff;border-color:#ffffffa8}
+.finalButton:active{transform:translateY(1px)}
+
+/* Code gate and final Father's Day message */
+#codeGate,#fatherMessage{display:none;position:fixed;inset:0;z-index:130;align-items:center;justify-content:flex-start;overflow:auto;padding:max(20px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 10%,#1a1c17,#070806 64%);color:#ecece5;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
+.codeWindow{position:relative;width:min(780px,100%);margin:auto;background:#0d0e0c;border:1px solid #2a2c25;border-radius:12px;box-shadow:0 24px 70px #000b;overflow:hidden}
+.windowBar{height:49px;display:flex;align-items:center;gap:11px;padding:0 20px;border-bottom:1px solid #24251f;background:#11120f}
+.windowDot{width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 1px #0005 inset}.windowDot.red{background:#ff6570}.windowDot.yellow{background:#f2d67a}.windowDot.green{background:#38db63}
+.gateBody{padding:clamp(25px,6vw,48px)}
+.gateEyebrow{margin:0 0 12px;color:#7fd8e9;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+#codeGate h2{margin:0 0 10px;font:700 clamp(24px,5vw,38px)/1.15 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#fff}
+#codeGate p{margin:0 0 22px;color:#a9aaa2;font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+#codeInput{width:100%;margin:0;padding:16px 17px;border:1px solid #44463d;border-radius:6px;outline:none;background:#171815;color:#d9f18d;font:700 20px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}
+#codeInput:focus{border-color:#d9f18d;box-shadow:0 0 0 3px #d9f18d1f}
+#codeError{min-height:24px;margin:9px 0 0;color:#ff7985;font-size:12px}
+.gateActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.gateButton{min-height:48px;border:1px solid #45473f;border-radius:6px;background:transparent;color:#e7e7df;font-weight:800}
+.gateButton.primary{border-color:#d9f18d;background:#d9f18d;color:#181a13}
+.gateButton:active{transform:translateY(1px)}
+.shake{animation:gateShake .32s ease-in-out}@keyframes gateShake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+
+@media(max-width:440px){#finalResults{padding:15px 11px}#finalTable td{padding:9px 5px}#finalTable th{padding:8px 5px}#finalSub{margin-bottom:17px}#finalActions{grid-template-columns:1fr}.gateActions{grid-template-columns:1fr}.gateButton.primary{grid-row:1}}
+
+/* Full-screen particle ending: only a pink heart and the greeting on black. */
+#overlay.courseTransition #message strong{font-weight:900;color:#fff}
+#fatherMessage{z-index:140!important;display:none;position:fixed;inset:0;align-items:stretch!important;justify-content:stretch!important;padding:0!important;overflow:hidden!important;background:#000!important;color:#fff}
+#particleCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;background:#000;pointer-events:none}
+.endingControls{position:absolute;z-index:4;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:flex;gap:7px;align-items:center}
+.endingControl{min-height:34px!important;border:1px solid #ff91b7aa;border-radius:999px;padding:7px 12px;background:#12080dcc;color:#ffe8f0;font:750 12px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.02em;box-shadow:0 5px 22px #0009,0 0 15px #ff4f8430;backdrop-filter:blur(7px);cursor:pointer}
+.endingControl:active{transform:scale(.96)}
+.endingControl:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.particleGreetingText{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Championship broadcast transition: white rounded outline and bold geometric lettering. */
+#overlay.courseTransition{background:linear-gradient(180deg,#10281c9e,#092419b8);backdrop-filter:blur(3px)}
+#overlay.courseTransition #panel{width:min(560px,88vw);max-width:560px;border:5px solid #fff;border-radius:clamp(35px,7vw,76px);background:#123d2933;box-shadow:0 12px 38px #06180b45;padding:clamp(25px,6vw,56px) clamp(20px,5vw,44px);color:#fff}
+#overlay.courseTransition #panel>div:first-child{font-family:Arial,Helvetica,sans-serif!important;font-weight:900!important;color:white!important;letter-spacing:.24em!important;font-size:clamp(10px,1.9vw,14px)!important}
+#overlay.courseTransition #heading{font-family:Arial Black,Arial,Helvetica,sans-serif;font-size:clamp(26px,6.8vw,52px);font-weight:900;line-height:1.04;letter-spacing:-.025em;text-transform:uppercase;color:#fff;text-shadow:0 2px 8px #0003;margin:18px 0}
+#overlay.courseTransition #message{font-family:Arial,Helvetica,sans-serif;font-size:clamp(13px,2.7vw,18px);font-weight:650;color:#fff;line-height:1.5}
+#overlay.courseTransition .action{font-family:Arial,Helvetica,sans-serif;font-size:clamp(13px,2.6vw,16px);font-weight:900;text-transform:uppercase;letter-spacing:.07em;background:#fff;color:#164333;border-radius:8px;padding:13px 24px;margin-top:18px}
+@media(max-width:400px){#overlay.courseTransition #panel{border-width:4px;border-radius:37px;padding:26px 20px}}
+
+/* The opening name-entry screen uses the same championship graphic as the transitions. */
+#overlay.welcomeTransition #panel{max-width:560px}
+#overlay.welcomeTransition #nameStep{margin:22px auto 4px;max-width:350px;text-align:left}
+#overlay.welcomeTransition #nameStep label{font-family:Arial,Helvetica,sans-serif!important;font-weight:900;letter-spacing:.12em!important;color:#fff}
+#overlay.welcomeTransition #playerNameInput{font-family:Arial,Helvetica,sans-serif;font-size:clamp(16px,3.4vw,20px);font-weight:750;letter-spacing:.04em;border:2px solid #fff;background:#ffffffed;color:#163d2e;padding:13px 15px;border-radius:8px;outline-offset:3px}
+#overlay.welcomeTransition #playerNameInput::placeholder{color:#63776f;font-weight:500}
+#overlay.welcomeTransition #nameError{font-size:12px;color:#ffddd7;min-height:1em}
+@media(max-width:430px){#overlay.welcomeTransition #panel{padding:26px 20px}#overlay.welcomeTransition #heading{font-size:clamp(25px,8vw,38px)}}
+
+</style><style id="swingMeterStyle">#swingMeter{position:fixed;z-index:6;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(190px,42vw);pointer-events:none;display:flex;flex-direction:column;gap:5px;align-items:center;font:700 9px system-ui,sans-serif;letter-spacing:.16em;color:#fff;text-shadow:0 1px 5px #0009}#swingMeterTrack{width:100%;height:7px;border:1px solid #ffffffa0;border-radius:20px;background:#0d241cc9;box-shadow:0 2px 12px #0006;overflow:hidden}#swingMeterFill{width:0;height:100%;background:linear-gradient(90deg,#a8d8a0 0%,#e8df8b 60%,#f2a35b 85%,#e96755 100%);border-radius:20px;transition:width .035s linear}#swingMeterValue{font-variant-numeric:tabular-nums}#swingMeter:not(.active){opacity:.6}#swingMeter.active{opacity:1}@media(max-width:520px){#swingMeter{width:40vw;bottom:max(12px,env(safe-area-inset-bottom))}}</style><style>
+/* iPhone portrait and landscape touch layout */
+html,body{height:100%;height:100dvh;overscroll-behavior:none;-webkit-text-size-adjust:100%;}
+#scene,#overlay,#score,#prize,#error{height:100%;height:100dvh;}
+button,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+button{min-height:44px;}
+input{font-size:16px!important;min-height:48px;}
+#overlay{overflow-y:auto;padding:calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom));}
+#panel{max-height:100%;overflow-y:auto;padding:clamp(15px,4vw,25px);}
+#score{overflow-y:auto;padding:calc(20px + env(safe-area-inset-top)) 14px calc(22px + env(safe-area-inset-bottom));}
+#cardView{padding:calc(55px + env(safe-area-inset-top)) 12px calc(15px + env(safe-area-inset-bottom));overflow-y:auto;}
+.openCard{max-height:calc(100dvh - 110px);min-height:0;overflow-y:auto;}
+#closeCard{position:fixed;}
+@media(max-width:650px){
+ #hud{top:calc(6px + env(safe-area-inset-top));left:7px;right:7px;gap:5px;}
+ #controls{left:9px;right:9px;bottom:calc(10px + env(safe-area-inset-bottom));gap:8px;}
+ #instructions{font-size:12px;line-height:1.35;max-width:min(57vw,230px);padding:9px;}
+ #extraControls button{font-size:12px;padding:10px 12px;}
+ #swingMeter{bottom:calc(7px + env(safe-area-inset-bottom));width:32vw;}
+ #panel h1{font-size:clamp(26px,7vw,40px);}
+ #panel p{font-size:14px;}
+ #prizeTitle{top:calc(10px + env(safe-area-inset-top));}
+ #cardView .cardInner{padding:15px 12px;}
+ #cardView .cardInner p{font-size:clamp(13px,3.8vw,17px);}
+}
+@media(max-height:550px){#panel{padding:12px;}#panel h1{margin:4px 0;}#panel p{line-height:1.25;margin:7px 0;}.openCard{max-height:calc(100dvh - 65px);}}
+</style></head><body><div id="scene"></div><div id="hud"><div class="pill" id="courseCorner"><b id="courseName">GEORGIA PINES</b><div id="holeLabel">HÅL 1 / 3 · PAR 4</div></div><div id="tvScore"><div class="tvTop"><div class="tvName" id="playerBadge">SPELARE</div><div class="tvTotal"><strong id="totalRelative">–</strong><small>TOTALT MOT PAR</small></div></div><div class="tvBottom"><div class="tvHole"><strong id="holeNumber">1st</strong></div><div class="tvYards"><strong id="holeYards">252 YDS</strong></div><div class="tvStrokes"><span>SLAG</span><strong id="shotLabel">0</strong></div></div><div class="tvDistance">TO HOLE: <b id="distanceTV">252 YDS</b></div><span id="distanceValue" hidden></span><span id="courseStats" hidden></span><span id="parStats" hidden></span></div></div><div id="leaderboard"><div class="boardTitle" id="boardTitle">LEADERBOARD</div><div class="boardHead"><span></span><span>NAMN</span><span>POÄNG</span><span>HÅL</span></div><div id="boardRows"></div></div><div id="speedBox"><b>BALL SPEED</b><span id="speedValue">0</span> <small>KM/H</small></div><div id="controls"><div id="instructions">Dra fingret nedåt på banan och släpp för att slå. Dra snett för att sikta.<div id="power"><i></i></div></div><div id="extraControls" style="display:grid;gap:8px"><button id="scoreBtn">Scorekort</button></div></div><div id="swingMeter" aria-label="Slagstyrka"><div>STYRKA <span id="swingMeterValue">0%</span></div><div id="swingMeterTrack"><div id="swingMeterFill"></div></div></div><div id="overlay" class="courseTransition welcomeTransition"><div id="panel"><div style="letter-spacing:.3em;font-size:11px;color:#d5c28e">FATHER'S DAY OPEN</div><h1 id="heading">The Championship</h1><p id="message">Tre amerikanskinspirerade mästerskapsbanor. Börja på tee, följ bollen och spela dig fram till pallplats.</p><div id="nameStep"><label for="playerNameInput" style="font-size:13px;letter-spacing:.06em">Ditt spelarnamn/Efternamn</label><input id="playerNameInput" maxlength="18" autocomplete="given-name" autocapitalize="characters" placeholder="Skriv ditt spelarnamn/efternamn"><div id="nameError"></div></div><button class="action" id="continueBtn">Starta turneringen</button></div></div><div id="score"><h2 style="text-align:center">Scorekort</h2><table><thead><tr><th>Bana</th><th>Par</th><th>Slag</th></tr></thead><tbody id="scoreRows"></tbody></table><p style="text-align:center" id="totalScore"></p><div style="text-align:center"><button class="action" id="closeScore">Tillbaka</button></div></div></div><section id="finalResults" aria-label="Turneringens slutresultat"><div id="finalInner"><div id="finalBrand">FATHER'S DAY<br>CHAMPIONSHIP</div><div id="finalSub">OFFICIAL FINAL LEADERBOARD · 3 HOLES</div><h2 id="finalHeading">Slutresultat</h2><div id="finalSummary"></div><table id="finalTable"><thead><tr><th>PL</th><th>SPELARE</th><th>RESULTAT</th><th>SLAG</th><th>HÅL</th></tr></thead><tbody id="finalRows"></tbody></table><div id="finalActions"><button id="playAgain" class="finalButton secondary">Spela igen</button><button id="finalNext" class="finalButton">Gå vidare</button></div></div></section><section id="codeGate" role="dialog" aria-modal="true" aria-labelledby="codeGateTitle"><div class="codeWindow"><div class="windowBar" aria-hidden="true"><span class="windowDot red"></span><span class="windowDot yellow"></span><span class="windowDot green"></span></div><div class="gateBody"><div class="gateEyebrow">// nästa del</div><h2 id="codeGateTitle">Skriv in koden</h2><p>Fyll i rätt kod för att låsa upp hälsningen.</p><label for="codeInput" class="gateEyebrow">Kod</label><input id="codeInput" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="codeError"><div id="codeError" role="alert"></div><div class="gateActions"><button id="codeBack" class="gateButton">Tillbaka</button><button id="codeUnlock" class="gateButton primary">Gå vidare</button></div></div></div></section><section id="fatherMessage" aria-label="Glad fars dag. Vi älskar dig. Önskar dig en fortsatt fin dag. Kram."><canvas id="particleCanvas" aria-hidden="true"></canvas><div class="endingControls" aria-label="Hälsningens kontroller"><button id="replayGreeting" class="endingControl" type="button">Igen</button><button id="returnToStart" class="endingControl" type="button">Till start</button></div><div class="particleGreetingText">Glad fars dag. Vi älskar dig. Önskar dig en fortsatt fin dag. Kram.</div></section><div id="error"><div><h2>3D-motorn kunde inte starta</h2><p>Öppna spelet via en vanlig HTTPS-webbsida i Safari. Den här versionen behöver internet och WebGL. ChatGPT:s filförhandsvisning kan blockera 3D-biblioteket.</p></div></div>
+<script type="module">
+import * as THREE from 'https://esm.sh/three@0.170.0';
+const $=id=>document.getElementById(id);let renderer,scene,camera,ball,flag,terrain,clouds=[],leaves=[],ballPos,velocity=new THREE.Vector3(),playing=false,drag=null,shotCount=0,hole=0,finished=[null,null,null],frame=0,holing=false,holeAnimation=0,holeStart=null,aimPower=0,aimDir=new THREE.Vector3();const names=['GEORGIA PINES','ARIZONA DESERT','FLORIDA COAST'];const pars=[4,4,3];const clock=new THREE.Clock();
+let playerName='',rivals=[],tracer=null,tracePoints=[],traceClock=0,shotPeak=0,flightTime=0,flightDuration=0,flightHeight=0,flightStart=null,flightEnd=null,shotTimer=0;
+const rivalNames=['SCHEFFLER','HOVLAND','GOTTERUP','SCOTT','GERARD','YOUNG','ÅBERG','HENLEY'];
+function createRivals(){
+ // Everyone plays at the same time, on staggered starting holes.
+ // Each rival's three scores are generated once and revealed round by round.
+ const starts=Array.from({length:9},(_,i)=>i+1);
+ for(let i=starts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[starts[i],starts[j]]=[starts[j],starts[i]];}
+ rivals=rivalNames.map((name,i)=>({
+  name,start:starts[i],completed:0,liveDelta:[-3,-2,-2,-1,-1,0,1,2,3][Math.floor(Math.random()*9)],
+  scores:Array.from({length:3},(_,round)=>{
+   const par=pars[round];
+   const roll=Math.random();const delta=roll<.08?-2:roll<.32?-1:roll<.64?0:roll<.88?1:2;
+   return Math.max(1,par+delta);
+  })
+ }));
+}
+function relativeLabel(value){return value===0?'E':value>0?'+'+value:String(value)}
+function rivalStats(r){
+ const completed=r.completed;
+ const strokes=r.scores.slice(0,completed).reduce((a,b)=>a+b,0);
+ const parPlayed=pars.slice(0,completed).reduce((a,b)=>a+b,0);
+ return {name:r.name,strokes,relative:completed?strokes-parPlayed:r.liveDelta,played:((r.start-1+completed)%9)+1,me:false};
+}
+function renderBoard(){
+ const completed=finished.filter(v=>v!==null).length;
+ const myStrokes=finished.reduce((sum,v)=>sum+(v??0),0);
+ const myPar=pars.slice(0,completed).reduce((a,b)=>a+b,0);
+ const entries=rivals.map(rivalStats);
+ entries.push({name:playerName||'DU',strokes:myStrokes,relative:myStrokes-myPar,played:hole+1,me:true,hasStarted:completed>0});
+ entries.sort((a,b)=>a.relative-b.relative || Number(b.me)-Number(a.me));
+ const unique=[...new Map(entries.map(r=>[r.name.toLocaleUpperCase('sv'),r])).values()];
+ $('boardTitle').textContent='LEADERBOARD';
+ $('boardRows').replaceChildren();
+ unique.forEach((r,i)=>{
+  const el=document.createElement('div');el.className='boardRow'+(r.me?' me':'');
+  const rank=document.createElement('span');rank.textContent=i+1;
+  const name=document.createElement('span');name.className='boardName';name.textContent=r.name;
+  const score=document.createElement('span');score.className='boardScore';score.textContent=r.me&&!r.hasStarted?'–':relativeLabel(r.relative);
+  const h=document.createElement('span');h.className='boardHole';h.textContent=r.played;
+  el.append(rank,name,score,h);$('boardRows').append(el);
+ });
+ $('totalRelative').textContent=completed===0?'–':relativeLabel(myStrokes-myPar);
+}
+
+function clearTracer(){if(tracer){scene.remove(tracer);tracer.geometry.dispose();tracer.material.dispose();tracer=null;}tracePoints=[];traceClock=0;}
+function updateTracer(){if(!ballPos||!scene)return;tracePoints.push(ballPos.clone().add(new THREE.Vector3(0,.12,0)));if(tracePoints.length>240)tracePoints.shift();if(tracePoints.length<2)return;if(tracer){scene.remove(tracer);tracer.geometry.dispose();tracer.material.dispose()}const path=new THREE.CatmullRomCurve3(tracePoints);const geo=new THREE.TubeGeometry(path,Math.min(180,tracePoints.length*2),.17,5,false);tracer=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x65b9ff,transparent:true,opacity:.95,depthTest:false,depthWrite:false}));tracer.renderOrder=999;scene.add(tracer)}
+function updateSpeed(){if(playing){const kmh=velocity.length()*3.6;shotPeak=Math.max(shotPeak,kmh);$('speedValue').textContent=Math.round(kmh);$('speedBox').style.display='block'}else{$('speedBox').style.display='none'}}
+function hideShotGraphics(){clearTracer();$('speedBox').style.display='none';shotTimer=0}
+function greenCenterX(){return hole===2?-30:0}
+function updateDistance(){const d=Math.hypot(ballPos.x-greenCenterX(),ballPos.z+210);$('distanceValue').textContent=Math.round(d)+' M';$('distanceTV').textContent=Math.round(d*1.0936133)+' YDS';}
+
+
+const palette=[{sky:0x9dbfd2,grass:0x477d38,rough:0x3b6631,sand:0xd5bd88,leaf:0x285b31},{sky:0xaac6d7,grass:0x66834a,rough:0x94794e,sand:0xd8b47e,leaf:0x436044},{sky:0xa8c9da,grass:0x40824d,rough:0x2c7145,sand:0xe3d4a5,leaf:0x32724d}];
+function fairwayCenter(z){const t=THREE.MathUtils.clamp((30-z)/240,0,1),base=9*Math.sin((z+50)*.013);if(hole!==2)return base;const leftTurn=THREE.MathUtils.smoothstep(t,.28,.72);return base-24*leftTurn}
+// Bunkers are actual depressions in the terrain, not flat sand decals.
+const bunkers=[[-28,-185,1.2],[31,-215,1],[27,-145,.8]];
+function activeBunkers(){return bunkers}
+function bunkerDepression(x,z){
+ let depth=0;
+ for(const [bx,bz,scale] of activeBunkers()){
+  const rx=10*scale, rz=7.2*scale;
+  const r=Math.hypot((x-bx)/rx,(z-bz)/rz);
+  // Smooth concave bowl with a rounded rim and a flatter sandy bottom.
+  if(r<1){const t=1-r*r;depth=Math.max(depth,(hole===2?2.35:1.9)*scale*t*t*(3-2*t));}
+ }
+ return depth;
+}
+function height(x,z){
+// Layered long-wavelength hills and localized ridges, avoiding repetitive waves.
+const ridge=(cx,cz,rx,rz,h)=>h*Math.exp(-(((x-cx)/rx)**2)-(((z-cz)/rz)**2));
+let natural;
+if(hole===0){ // Georgia: broad, smooth rolling fairway and an off-center shoulder
+ natural=1.55*Math.sin(z*.011+x*.005)+.7*Math.cos(x*.017-z*.006)
+ +ridge(40,-90,52,105,2.7)-ridge(-24,-155,48,65,1.25)+ridge(-64,-10,55,70,1.3);
+}else if(hole===1){ // Arizona: distinct irregular ridges and low valleys
+ natural=1.65*Math.sin(z*.014-x*.008)+1.1*Math.cos(x*.015+z*.009)
+ +ridge(-44,-62,36,80,3.7)+ridge(48,-172,45,65,3.1)-ridge(6,-118,38,58,1.7);
+}else{ // Florida: long coastal swales and gentle raised banks
+ natural=3.2*Math.sin(z*.010+x*.006)+1.8*Math.cos(x*.014-z*.007)
+ +ridge(34,-95,65,90,5.5)+ridge(-37,-163,48,73,4.3)
+ -ridge(5,-128,38,48,3.3)+ridge(-67,-215,62,74,2.9);
+ // A low coastal basin keeps the water visibly beside, not across, the fairway.
+ const shoreline=-57+7*Math.exp(-Math.pow((z+110)/48,2))+2*Math.sin(z*.061);
+ const waterSide=1-THREE.MathUtils.smoothstep(x,shoreline-13,shoreline+5);
+ const waterEnds=THREE.MathUtils.smoothstep(z,-198,-176)*(1-THREE.MathUtils.smoothstep(z,-44,-24));
+ const waterBasin=waterSide*waterEnds;
+ natural=THREE.MathUtils.lerp(natural,-3.35,waterBasin);
+}
+// A closely mown, gently elevated teeing ground and a playable putting green.
+const teeDistance=Math.hypot(x,z-20);
+const teeBlend=THREE.MathUtils.smoothstep(teeDistance,8,29);
+const targetX=greenCenterX();
+const greenDistance=Math.hypot(x-targetX,(z+210)*1.04);
+const greenBlend=THREE.MathUtils.smoothstep(greenDistance,13,36);
+const flagRise=1.15*Math.exp(-(((x-targetX)*(x-targetX))/210+((z+210)*(z+210))/260));
+// A softly raised rough embankment immediately outside both fairway edges.
+const edgeDistance=Math.abs(x-fairwayCenter(z));
+const outer=THREE.MathUtils.smoothstep(edgeDistance,24,34)*(1-THREE.MathUtils.smoothstep(edgeDistance,39,57));
+const shoulderRise=outer*(hole===2?1.9:1.25);
+return natural*teeBlend*greenBlend+flagRise+shoulderRise-bunkerDepression(x,z);
+}
+function mat(color,roughness=1){return new THREE.MeshStandardMaterial({color,roughness})}function mesh(g,m,x=0,y=0,z=0){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
+function addFloridaWater(){const segments=72,vertices=[],indices=[];for(let i=0;i<=segments;i++){const t=i/segments,z=-28-t*170,innerX=-57+7*Math.exp(-Math.pow((z+110)/48,2))+2*Math.sin(z*.061),outerX=-168,wave=.035*Math.sin(i*.7)+.018*Math.sin(i*1.83);vertices.push(outerX,-2.47+wave,z,innerX,-2.47+wave,z)}for(let i=0;i<segments;i++){const a=i*2;indices.push(a,a+2,a+1,a+1,a+2,a+3)}const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geometry.setIndex(indices);geometry.computeVertexNormals();const material=new THREE.MeshStandardMaterial({color:0x1f6682,roughness:.2,metalness:.08,transparent:true,opacity:.9,side:THREE.DoubleSide});const water=mesh(geometry,material);water.castShadow=false;water.receiveShadow=true;water.userData.doglegWater=true}
+function ground(){const p=palette[hole];const g=new THREE.PlaneGeometry(420,620,150,220);g.rotateX(-Math.PI/2);const pos=g.attributes.position;for(let i=0;i<pos.count;i++){let x=pos.getX(i),z=pos.getZ(i);pos.setY(i,height(x,z))}g.computeVertexNormals();terrain=mesh(g,mat(p.rough));if(hole===2)addFloridaWater();const fair=new THREE.PlaneGeometry(53,310,42,160);fair.rotateX(-Math.PI/2);const a=fair.attributes.position;for(let i=0;i<a.count;i++){let x=a.getX(i),z=a.getZ(i)-112;let bend=fairwayCenter(z);a.setXYZ(i,x+bend,height(x+bend,z)+.07,z)}fair.computeVertexNormals();mesh(fair,mat(p.grass,.95));const targetX=greenCenterX(),green=new THREE.CircleGeometry(22,96);green.rotateX(-Math.PI/2);
+const gp=green.attributes.position;for(let i=0;i<gp.count;i++){const x=gp.getX(i),z=gp.getZ(i)*.72;gp.setXYZ(i,x,height(x+targetX,z-210)+.13,z)}green.computeVertexNormals();
+const gg=mesh(green,mat(hole===1?0x628d53:0x3c8545),targetX,0,-210);gg.scale.z=.72;for(const [x,z,s] of activeBunkers()){
+ // Dense, shaped sand surface follows the bottom and sloping walls of each pit.
+ const vertices=[],indices=[],segments=96,rings=12;
+ for(let ring=0;ring<=rings;ring++){
+  const r=ring/rings;
+  for(let k=0;k<=segments;k++){
+   const a=k/segments*Math.PI*2,xx=Math.cos(a)*10*s*r,zz=Math.sin(a)*7.2*s*r;
+   vertices.push(xx,height(x+xx,z+zz)+.065,zz);
+  }
+ }
+ for(let ring=0;ring<rings;ring++)for(let k=0;k<segments;k++){
+  const a=ring*(segments+1)+k,b=a+segments+1;
+  indices.push(a,b,a+1,b,b+1,a+1);
+ }
+ const bg=new THREE.BufferGeometry();bg.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));bg.setIndex(indices);
+ bg.computeVertexNormals();
+ const bunker=mesh(bg,mat(p.sand),x,0,z);
+}
+// Subtle raised rough shoulders framing the mown fairway, following its bends.
+// These are broad natural grassy banks, not artificial mini-golf walls.
+for(const side of [-1,1]){
+ const shoulder=new THREE.PlaneGeometry(12,310,8,160);
+ shoulder.rotateX(-Math.PI/2);
+ const sp=shoulder.attributes.position;
+ for(let i=0;i<sp.count;i++){
+   const localX=sp.getX(i),z=sp.getZ(i)-112;
+   const center=fairwayCenter(z);
+   const x=center+side*32+localX;
+   const across=Math.abs(localX)/6;
+   const raised=(.16+.28*Math.exp(-across*across*1.6))*(.85+.15*Math.sin(z*.029+side));
+   sp.setXYZ(i,x,height(x,z)+.09+raised,z);
+ }
+ shoulder.computeVertexNormals();
+ const bank=mesh(shoulder,new THREE.MeshStandardMaterial({color:p.rough,roughness:1,side:THREE.DoubleSide}));
+ bank.castShadow=false;
+}
+// Tee box: manicured turf follows the same underlying terrain.
+const teeGeo=new THREE.PlaneGeometry(19,25,18,24);teeGeo.rotateX(-Math.PI/2);
+const ta=teeGeo.attributes.position;
+for(let i=0;i<ta.count;i++){const xx=ta.getX(i),zz=ta.getZ(i)+20;ta.setXYZ(i,xx,height(xx,zz)+.115,zz-20)}
+teeGeo.computeVertexNormals();mesh(teeGeo,mat(0x4c9a53,.97),0,0,20);
+// Thin grass blades near the tee and fairway margins
+const bladeMat=new THREE.MeshStandardMaterial({color:0x79a45b,side:THREE.DoubleSide,roughness:1});const bladeGeo=new THREE.BufferGeometry();let verts=[];for(let i=0;i<2200;i++){let x=(Math.random()-.5)*125,z=30-Math.random()*240;if(Math.abs(x)<18&&z<15&&z>-185)continue;let y=height(x,z),h=.12+Math.random()*.4;verts.push(x,y,z,x+.05,y+h,z+.05,x+.1,y,z)}bladeGeo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));bladeGeo.computeVertexNormals();const grass=mesh(bladeGeo,bladeMat);grass.castShadow=false}
+function tree(x,z,scale){const p=palette[hole],y=height(x,z);const trunk=mesh(new THREE.CylinderGeometry(.38*scale,.65*scale,7*scale,9),mat(0x554c3b),x,y+3.5*scale,z);const group=new THREE.Group();group.position.set(x,y+7.5*scale,z);scene.add(group);for(let j=0;j<8;j++){let r=2.5*scale+Math.random()*1.3*scale;let leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),mat(p.leaf));leaf.position.set((Math.random()-.5)*3*scale,(Math.random()-.5)*3*scale,(Math.random()-.5)*3*scale);leaf.castShadow=true;group.add(leaf)}leaves.push({group,phase:Math.random()*6,sway:.005+Math.random()*.006});return trunk}
+const cactusMaterial=new THREE.MeshStandardMaterial({color:0x487a45,roughness:1});
+const cactusStemGeometry=new THREE.CylinderGeometry(.48,.62,5.8,9,2);
+const cactusArmGeometry=new THREE.CylinderGeometry(.29,.36,2.35,8,1);
+const cactusBridgeGeometry=new THREE.CylinderGeometry(.28,.33,1.45,8,1);
+const cactusCapGeometry=new THREE.SphereGeometry(.5,9,6);
+function cactus(x,z,scale){const y=height(x,z),group=new THREE.Group();group.position.set(x,y,z);group.scale.setScalar(scale);scene.add(group);const stem=new THREE.Mesh(cactusStemGeometry,cactusMaterial);stem.position.y=2.9;stem.castShadow=true;group.add(stem);const top=new THREE.Mesh(cactusCapGeometry,cactusMaterial);top.position.y=5.78;top.scale.y=.72;top.castShadow=true;group.add(top);for(const side of [-1,1]){const armLevel=side<0?2.45:3.15,bridge=new THREE.Mesh(cactusBridgeGeometry,cactusMaterial);bridge.rotation.z=Math.PI/2;bridge.position.set(side*.72,armLevel,0);bridge.castShadow=true;group.add(bridge);const arm=new THREE.Mesh(cactusArmGeometry,cactusMaterial);arm.position.set(side*1.42,armLevel+.92,0);arm.scale.y=side<0?.78:1.05;arm.castShadow=true;group.add(arm);const cap=new THREE.Mesh(cactusCapGeometry,cactusMaterial);cap.position.set(side*1.42,armLevel+1.85*(side<0?.78:1.05),0);cap.scale.set(.64,.48,.64);cap.castShadow=true;group.add(cap)}return group}
+function buildTrees(){let rng=hole*113+87;function random(){rng=(rng*1664525+1013904223)>>>0;return rng/4294967296}for(let i=0;i<90;i++){let z=35-random()*300,x=(random()<.5?-1:1)*(31+random()*75);tree(x,z,1+random()*1.35)}for(let i=0;i<16;i++){let z=-235-random()*60,x=(random()-.5)*180;tree(x,z,1+random()*1.3)}if(hole===1){const cactusSpots=[[-52,12,1.08],[58,-18,.94],[-63,-54,1.18],[55,-91,1.03],[-58,-135,.88],[68,-168,1.22],[-52,-214,1.02],[74,-248,1.14]];cactusSpots.forEach(([x,z,scale])=>cactus(x,z,scale))}}
+function buildSky(){
+const day=hole===0,dusk=hole===1,night=hole===2;
+const skyColor=day?0x90c7e6:dusk?0xd78176:0x071328;
+if(dusk){
+ const skyCanvas=document.createElement('canvas');skyCanvas.width=1024;skyCanvas.height=512;
+ const ctx=skyCanvas.getContext('2d');
+ const blue=ctx.createLinearGradient(0,0,0,512);
+ blue.addColorStop(0,'#173c72');blue.addColorStop(.44,'#4778ae');blue.addColorStop(.76,'#8faac5');blue.addColorStop(1,'#b6bdc7');
+ ctx.fillStyle=blue;ctx.fillRect(0,0,1024,512);
+ // The orange sunset originates around the visible sun and fades naturally into blue sky.
+ const sunset=ctx.createRadialGradient(805,365,4,805,365,550);
+ sunset.addColorStop(0,'rgba(255,218,159,.94)');sunset.addColorStop(.12,'rgba(255,181,126,.77)');
+ sunset.addColorStop(.29,'rgba(244,157,131,.48)');sunset.addColorStop(.55,'rgba(190,150,165,.15)');
+ sunset.addColorStop(1,'rgba(110,153,206,0)');
+ ctx.fillStyle=sunset;ctx.fillRect(0,0,1024,512);
+ const skyTexture=new THREE.CanvasTexture(skyCanvas);skyTexture.colorSpace=THREE.SRGBColorSpace;
+ scene.background=skyTexture;
+}else scene.background=new THREE.Color(skyColor);
+scene.fog=new THREE.FogExp2(dusk?0x8799b2:night?0x071328:skyColor,night?.00065:.0014);
+const sunlight=new THREE.DirectionalLight(day?0xfff8e8:dusk?0xffd1a8:0x9db4d6,day?2.65:dusk?1.65:0);
+sunlight.position.set(day?-90:85,day?165:dusk?35:85,-110);
+sunlight.castShadow=true;sunlight.shadow.mapSize.set(2048,2048);
+sunlight.shadow.camera.left=-180;sunlight.shadow.camera.right=180;sunlight.shadow.camera.top=180;sunlight.shadow.camera.bottom=-180;sunlight.shadow.bias=-.0004;scene.add(sunlight);
+scene.add(new THREE.HemisphereLight(day?0xeaf5ff:dusk?0x9bb8dc:0x18263a,night?0x101c18:0x496c38,day?1.6:dusk?0.85:0.16));
+renderer.toneMappingExposure=day?1.16:dusk?1.13:1.15;
+const sunTextureCanvas=document.createElement('canvas');sunTextureCanvas.width=sunTextureCanvas.height=128;
+const sx=sunTextureCanvas.getContext('2d'),grad=sx.createRadialGradient(64,64,3,64,64,64);
+grad.addColorStop(0,day?'rgba(255,251,221,.95)':dusk?'rgba(255,213,150,.95)':'rgba(222,232,255,.9)');
+grad.addColorStop(.16,day?'rgba(255,241,194,.78)':dusk?'rgba(255,143,86,.7)':'rgba(182,202,255,.25)');
+grad.addColorStop(.4,day?'rgba(255,243,214,.09)':dusk?'rgba(255,117,76,.18)':'rgba(166,195,255,.07)');grad.addColorStop(1,'rgba(255,213,147,0)');
+sx.fillStyle=grad;sx.fillRect(0,0,128,128);
+const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(sunTextureCanvas),transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}));
+if(!night){glow.position.set(day?-175:175,day?145:39,-350);glow.scale.set(day?46:67,day?46:67,1);scene.add(glow);}
+if(!night){const cm=new THREE.MeshBasicMaterial({color:dusk?0xffd1ad:0xffffff,transparent:true,opacity:dusk?.18:.28,depthWrite:false});for(let i=0;i<7;i++){let c=new THREE.Group();for(let j=0;j<5;j++){let m=new THREE.Mesh(new THREE.SphereGeometry(13+Math.random()*10,8,6),cm);m.scale.y=.23;m.position.x=j*13;c.add(m)}c.position.set(-160+i*60,dusk?45+i%3*9:75+i%3*12,-240-i*10);scene.add(c);clouds.push(c)}}
+if(night){
+// Tiny luminous stars far above the fairway, with a gentle shimmer.
+const vertices=[],random=(i)=>{let n=Math.sin(i*127.1+hole*33.3)*43758.5453;return n-Math.floor(n)};
+for(let i=0;i<1900;i++){let x=(random(i*3)-.5)*1100,y=42+random(i*3+1)*390,z=-460+random(i*3+2)*700;vertices.push(x,y,z)}
+const starsGeo=new THREE.BufferGeometry();starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+const stars=new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xf2f5ff,size:1.9,sizeAttenuation:false,transparent:true,opacity:.88,depthWrite:false}));stars.userData.stars=true;scene.add(stars);
+// Warm course lights beside the fairway, not in the ball's path.
+for(const z of [5,-50,-110,-168,-224])for(const side of [-1,1]){
+const x=fairwayCenter(z)+side*(30+(z===-110?4:0));const y=height(x,z);
+const pole=mesh(new THREE.CylinderGeometry(.24,.38,17,12),mat(0x303a3a,.58),x,y+8.5,z);
+// Large rectangular stadium floodlight panel with a visible bank of bright bulbs.
+const head=new THREE.Group();head.position.set(x,y+17.3,z);head.lookAt(fairwayCenter(z),height(fairwayCenter(z),z)+2,z-14);scene.add(head);
+const panel=new THREE.Mesh(new THREE.BoxGeometry(5.5,2.8,.55),new THREE.MeshStandardMaterial({color:0x465158,metalness:.55,roughness:.42}));head.add(panel);
+const bulbMat=new THREE.MeshBasicMaterial({color:0xfaffff});
+for(let r=0;r<3;r++)for(let c=0;c<6;c++){
+ const bulb=new THREE.Mesh(new THREE.BoxGeometry(.63,.55,.1),bulbMat);
+ bulb.position.set((c-2.5)*.79,(r-1)*.78,.34);head.add(bulb);
+}
+// A soft translucent shaft of light makes the illumination visible in the night air.
+const beamOrigin=new THREE.Vector3(x,y+17.3,z);
+const beamEnd=new THREE.Vector3(fairwayCenter(z),height(fairwayCenter(z),z)+.5,z-12);
+const beamDir=new THREE.Vector3().subVectors(beamEnd,beamOrigin);
+const beamLength=beamDir.length();
+const beam=new THREE.Mesh(new THREE.ConeGeometry(beamLength*.27,beamLength,32,1,true),new THREE.MeshBasicMaterial({color:0xc9ddf5,transparent:true,opacity:.017,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));
+beam.position.copy(beamOrigin).addScaledVector(beamDir,.5);
+beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),beamDir.clone().normalize().negate());scene.add(beam);
+// Stadium-style floodlight: elevated cool-white beam lights the playing surface.
+const flood=new THREE.SpotLight(0xf0f5ff,310,125,Math.PI/3.4,.68,1.2);
+flood.position.set(x,y+17.3,z);flood.target.position.set(fairwayCenter(z),height(fairwayCenter(z),z),z-12);
+scene.add(flood);scene.add(flood.target);
+const fill=new THREE.PointLight(0xe7f0ff,5,18,2);fill.position.set(x,y+17,z);scene.add(fill);
+const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(sunTextureCanvas),color:0xf5f9ff,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));halo.position.set(x,y+17.3,z);halo.scale.set(8,6,1);scene.add(halo);
+}
+}
+}
+function makeFlag(){const x=greenCenterX(),z=-210,y=height(x,z);mesh(new THREE.CylinderGeometry(.09,.09,7,8),mat(0xf4f5ee),x,y+3.5,z);const clothGeo=new THREE.PlaneGeometry(4,2.4,14,4);const cloth=new THREE.Mesh(clothGeo,new THREE.MeshStandardMaterial({color:0xb72d25,side:THREE.DoubleSide,roughness:.9}));cloth.position.set(x+2,y+6,z);cloth.userData.flag=true;scene.add(cloth);flag=cloth;const cup=mesh(new THREE.CylinderGeometry(.36,.36,.025,24),mat(0x172b1f),x,y+.22,z);cup.castShadow=false}
+function makeBall(){ballPos=new THREE.Vector3(0,height(0,20)+.45,20);ball=mesh(new THREE.SphereGeometry(.42,24,16),mat(0xf6f6ef,.35),ballPos.x,ballPos.y,ballPos.z);const tee=mesh(new THREE.CylinderGeometry(.12,.07,.55,10),mat(0xf8e5d4),0,height(0,20)+.25,20);tee.name='tee';const shadow=mesh(new THREE.CircleGeometry(.58,20),new THREE.MeshBasicMaterial({color:0x142419,transparent:true,opacity:.35,depthWrite:false}),0,height(0,20)+.035,20);shadow.rotation.x=-Math.PI/2;shadow.name='ballShadow'}
+function init(){try{renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;$('scene').appendChild(renderer.domElement);camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,900);window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});buildHole();animate()}catch(e){$('error').style.display='flex';console.error(e)}}
+function buildHole(){scene=new THREE.Scene();tracer=null;tracePoints=[];shotPeak=0;$('speedBox').style.display='none';flightTime=0;shotTimer=0;clouds=[];leaves=[];velocity.set(0,0,0);shotCount=0;playing=false;holing=false;holeAnimation=0;holeStart=null;buildSky();ground();buildTrees();makeFlag();makeBall();$('courseName').textContent=names[hole];$('holeLabel').textContent=`HÅL ${hole+1} / 3 · PAR ${pars[hole]}`;$('courseStats').textContent=names[hole];$('parStats').textContent='PAR '+pars[hole];$('holeNumber').textContent=(hole+1)+(['st','nd','rd'][hole]||'th');$('holeYards').innerHTML=Math.round(230*1.0936133)+' <em>YDS</em>';updateShot();renderBoard();updateDistance();const targetX=greenCenterX();camera.position.set(0,height(0,33)+3.4,36);camera.lookAt(targetX,height(targetX,-210)+2.8,-210)}
+function updateShot(){$('shotLabel').textContent=shotCount;renderBoard()}function showOverlay(title,msg,label,callback,useHTML=false){
+ $('overlay').classList.remove('welcomeTransition');
+ $('overlay').classList.add('courseTransition');
+ $('heading').textContent=title;
+ if(useHTML)$('message').innerHTML=msg;else $('message').textContent=msg;
+ $('continueBtn').textContent=label;
+ $('continueBtn').onclick=()=>{$('overlay').style.display='none';callback?.()};
+ $('overlay').style.display='flex';
+}
+function finishHole(){
+ playing=false;
+ finished[hole]=shotCount;
+ rivals.forEach(r=>{r.completed=Math.min(3,r.completed+1)});
+ renderBoard();
+ if(hole<2){
+  const playedCourse=names[hole].toLocaleLowerCase('sv-SE');
+  const nextCourse=names[hole+1].toLocaleLowerCase('sv-SE');
+  const roundMessage='Du spelade <strong>'+playedCourse+'</strong> på '+shotCount+' slag. Nästa bana: <strong>'+nextCourse+'</strong>.';
+  showOverlay('Hål '+(hole+1)+' klart',roundMessage,'Nästa bana',()=>{hole++;buildHole()},true);
+ }else{
+  showFinalResults();
+ }
+}
+function showFinalResults(){
+ const parTotal=pars.reduce((a,b)=>a+b,0),myTotal=finished.reduce((a,b)=>a+b,0);
+ // Everyone has now completed three rounds, on their own staggered holes.
+ const entries=rivals.map(r=>{const strokes=r.scores.slice(0,r.completed).reduce((a,b)=>a+b,0);return{name:r.name,strokes,relative:strokes-parTotal,me:false}});
+ entries.push({name:playerName||'DU',strokes:myTotal,relative:myTotal-parTotal,me:true});
+ entries.sort((a,b)=>a.relative-b.relative||a.strokes-b.strokes||Number(b.me)-Number(a.me));
+ const place=entries.findIndex(r=>r.me)+1;
+ $('finalHeading').textContent=place<=3?'Grattis, du kom på plats '+place:'Du slutade på plats '+place;
+ $('finalSummary').textContent=playerName+': '+myTotal+' slag på tre hål (par '+parTotal+', '+relativeLabel(myTotal-parTotal)+'). Georgia '+finished[0]+' slag · Arizona '+finished[1]+' slag · Florida '+finished[2]+' slag.';
+ $('finalRows').replaceChildren();entries.forEach((r,i)=>{const tr=document.createElement('tr');if(r.me)tr.className='finalMe';const cells=[i+1,r.name,relativeLabel(r.relative),r.strokes,'3 / 3'];cells.forEach((v,j)=>{const td=document.createElement('td');td.textContent=v;if(j===2)td.className='finalScore';tr.append(td)});$('finalRows').append(tr)});
+ $('leaderboard').style.display='none';$('hud').style.display='none';$('controls').style.display='none';$('speedBox').style.display='none';$('finalResults').style.display='block';
+}
+
+function openCodeGate(){
+ $('finalResults').style.display='none';
+ $('codeError').textContent='';
+ $('codeInput').value='';
+ $('codeGate').style.display='flex';
+ setTimeout(()=>$('codeInput').focus(),50);
+}
+function closeCodeGate(){
+ $('codeGate').style.display='none';
+ $('finalResults').style.display='block';
+}
+let particleAnimationFrame=0;
+let particleResizeHandler=null;
+
+function checkAccessCode(){
+ const input=$('codeInput');
+ if(input.value.trim().toUpperCase()!=='FDG08!#'){
+  $('codeError').textContent='Fel kod. Försök igen.';
+  input.classList.remove('shake');
+  void input.offsetWidth;
+  input.classList.add('shake');
+  input.focus();
+  input.select();
+  return;
+ }
+ $('codeGate').style.display='none';
+ $('fatherMessage').style.display='flex';
+ startParticleGreeting();
+}
+
+function startParticleGreeting(){
+ const canvas=$('particleCanvas');
+ const context=canvas.getContext('2d');
+ if(!context)return;
+ cancelAnimationFrame(particleAnimationFrame);
+ if(particleResizeHandler){
+  window.removeEventListener('resize',particleResizeHandler);
+  window.removeEventListener('orientationchange',particleResizeHandler);
+  if(window.visualViewport)window.visualViewport.removeEventListener('resize',particleResizeHandler);
+ }
+
+ const textCanvas=document.createElement('canvas');
+ const textContext=textCanvas.getContext('2d',{willReadFrequently:true});
+ if(!textContext)return;
+ const scenes=[
+  {kind:'heart',hold:5200},
+  {kind:'text',lines:['GLAD FARS DAG'],hold:4700},
+  {kind:'text',lines:['VI ÄLSKAR DIG'],hold:4700},
+  {kind:'text',lines:['ÖNSKAR DIG EN','FORTSATT FIN DAG'],hold:5200},
+  {kind:'text',lines:['KRAM','♥'],hold:Infinity}
+ ];
+ const particleColors=['#ffe7f0','#ffc5d8','#ff91b8','#ff5c9b','#ff3f86'];
+ const backgroundColors=['#ffbad1','#ff79aa','#ff4f93','#ffe4ee'];
+ const particles=[];
+ const backgroundHearts=[];
+ let width=Math.max(1,innerWidth),height=Math.max(1,innerHeight),pixelRatio=1;
+ let sceneIndex=0;
+ const startedAt=performance.now();
+ const formDuration=2800;
+ const disperseDuration=1800;
+ const sceneStarts=[];
+ let sceneCursor=0;
+ scenes.forEach((scene,index)=>{
+  sceneStarts[index]=sceneCursor;
+  if(index<scenes.length-1)sceneCursor+=formDuration+scene.hold+disperseDuration;
+ });
+
+ const randomStartPoint=()=>{
+  if(Math.random()<.44){
+   const side=Math.floor(Math.random()*4);
+   if(side===0)return{x:Math.random()*width,y:-35};
+   if(side===1)return{x:width+35,y:Math.random()*height};
+   if(side===2)return{x:Math.random()*width,y:height+35};
+   return{x:-35,y:Math.random()*height};
+  }
+  return{x:Math.random()*width,y:Math.random()*height};
+ };
+
+ const shuffle=values=>{
+  for(let index=values.length-1;index>0;index--){
+   const other=Math.floor(Math.random()*(index+1));
+   [values[index],values[other]]=[values[other],values[index]];
+  }
+  return values;
+ };
+
+ const makeHeartTargets=()=>{
+  const curve=[];
+  for(let angle=0;angle<Math.PI*2;angle+=.016){
+   curve.push({
+    x:16*Math.pow(Math.sin(angle),3),
+    y:13*Math.cos(angle)-5*Math.cos(2*angle)-2*Math.cos(3*angle)-Math.cos(4*angle)
+   });
+  }
+  const minX=-16,maxX=16,minY=-17,maxY=12;
+  const desiredWidth=Math.min(width*.79,650);
+  const desiredHeight=Math.min(height*.59,590);
+  const scale=Math.min(desiredWidth/(maxX-minX),desiredHeight/(maxY-minY));
+  const centerX=width/2-(minX+maxX)*scale/2;
+  const centerY=height/2+(minY+maxY)*scale/2;
+  const targets=[];
+  curve.forEach((point,index)=>{
+   for(let layer=0;layer<5;layer++){
+    const spread=layer===0?1.1:3.8;
+    const jitterX=Math.sin((index+1)*(layer+2)*1.731)*spread*.5;
+    const jitterY=Math.cos((index+3)*(layer+1)*1.193)*spread*.5;
+    targets.push({x:centerX+point.x*scale+jitterX,y:centerY-point.y*scale+jitterY});
+   }
+  });
+  return shuffle(targets);
+ };
+
+ const makeTextTargets=lines=>{
+  textCanvas.width=Math.max(1,Math.round(width));
+  textCanvas.height=Math.max(1,Math.round(height));
+  textContext.clearRect(0,0,textCanvas.width,textCanvas.height);
+  const longest=lines.reduce((value,line)=>Math.max(value,line.length),1);
+  const widthBased=width/(longest*.69);
+  const fontSize=Math.max(24,Math.min(height*.125,widthBased,98));
+  const lineHeight=fontSize*1.28;
+  const startY=height/2-(lines.length-1)*lineHeight/2;
+  textContext.fillStyle='#fff';
+  textContext.textAlign='center';
+  textContext.textBaseline='middle';
+  textContext.font='900 '+fontSize+'px Arial Black, Arial, Helvetica, sans-serif';
+  lines.forEach((line,index)=>textContext.fillText(line,width/2,startY+index*lineHeight));
+  const pixels=textContext.getImageData(0,0,textCanvas.width,textCanvas.height).data;
+  const gap=width<600?4:6;
+  const targets=[];
+  for(let y=0;y<textCanvas.height;y+=gap){
+   for(let x=0;x<textCanvas.width;x+=gap){
+    if(pixels[(y*textCanvas.width+x)*4+3]>120)targets.push({x,y});
+   }
+  }
+  if(targets.length>2500){
+   const step=targets.length/2500;
+   return shuffle(Array.from({length:2500},(_,index)=>targets[Math.floor(index*step)]));
+  }
+  return shuffle(targets);
+ };
+
+ const setScene=scene=>{
+  const targets=scene.kind==='heart'?makeHeartTargets():makeTextTargets(scene.lines);
+  while(particles.length<targets.length){
+   const start=randomStartPoint();
+   particles.push({
+    x:start.x,y:start.y,size:.8+Math.random()*1.7,
+    seed:Math.random()*Math.PI*2,
+    color:particleColors[Math.floor(Math.random()*particleColors.length)]
+   });
+  }
+  particles.forEach((particle,index)=>{
+   particle.sx=particle.x;particle.sy=particle.y;
+   if(index<targets.length){
+    particle.tx=targets[index].x;particle.ty=targets[index].y;particle.visible=true;
+   }else{
+    particle.visible=false;
+   }
+   const end=randomStartPoint();particle.ex=end.x;particle.ey=end.y;
+  });
+ };
+
+ const drawSmallHeart=(x,y,size)=>{
+  context.beginPath();
+  context.moveTo(x,y+size*.36);
+  context.bezierCurveTo(x-size,y-size*.25,x-size*.55,y-size,x,y-size*.46);
+  context.bezierCurveTo(x+size*.55,y-size,x+size,y-size*.25,x,y+size*.36);
+  context.fill();
+ };
+
+ for(let index=0;index<48;index++){
+  backgroundHearts.push({
+   x:Math.random(),y:Math.random(),
+   speed:.0000045+Math.random()*.000009,
+   drift:.006+Math.random()*.018,
+   phase:Math.random()*Math.PI*2,
+   size:2.2+Math.random()*4.5,
+   alpha:.06+Math.random()*.2,
+   color:backgroundColors[Math.floor(Math.random()*backgroundColors.length)]
+  });
+ }
+
+ const resize=()=>{
+  const oldWidth=width,oldHeight=height;
+  width=Math.max(1,innerWidth);height=Math.max(1,innerHeight);
+  pixelRatio=Math.min(devicePixelRatio||1,2);
+  canvas.width=Math.round(width*pixelRatio);canvas.height=Math.round(height*pixelRatio);
+  context.setTransform(pixelRatio,0,0,pixelRatio,0,0);
+  if(oldWidth&&oldHeight){
+   particles.forEach(particle=>{
+    particle.x=particle.x/oldWidth*width;
+    particle.y=particle.y/oldHeight*height;
+   });
+  }
+  setScene(scenes[sceneIndex]);
+ };
+
+ resize();
+ const easeInOut=value=>value<.5?4*value*value*value:1-Math.pow(-2*value+2,3)/2;
+ const easeIn=value=>value*value*value;
+ const sceneForElapsed=elapsed=>{
+  for(let index=scenes.length-1;index>=0;index--){
+   if(elapsed>=sceneStarts[index])return index;
+  }
+  return 0;
+ };
+
+ const animate=time=>{
+  const elapsed=time-startedAt;
+  context.clearRect(0,0,width,height);
+  context.globalCompositeOperation='lighter';
+  context.shadowColor='#ff4f94';
+  context.shadowBlur=5;
+  backgroundHearts.forEach(heart=>{
+   const y=((heart.y-elapsed*heart.speed)%1.16+1.16)%1.16-.08;
+   const x=(heart.x+Math.sin(time*.00034+heart.phase)*heart.drift+1)%1;
+   const twinkle=.52+.48*(.5+.5*Math.sin(time*.0042+heart.phase));
+   context.globalAlpha=heart.alpha*twinkle;
+   context.fillStyle=heart.color;
+   drawSmallHeart(x*width,y*height,heart.size*(.82+.18*twinkle));
+  });
+
+  const nextScene=sceneForElapsed(elapsed);
+  if(nextScene!==sceneIndex){
+   sceneIndex=nextScene;
+   setScene(scenes[sceneIndex]);
+  }
+  const localTime=elapsed-sceneStarts[sceneIndex];
+  const forming=Math.min(1,localTime/formDuration);
+  const activeScene=scenes[sceneIndex];
+  const dispersing=sceneIndex<scenes.length-1&&localTime>formDuration+activeScene.hold;
+  const disperseProgress=dispersing?Math.min(1,(localTime-formDuration-activeScene.hold)/disperseDuration):0;
+
+  context.shadowBlur=7;
+  particles.forEach(particle=>{
+   if(!particle.visible)return;
+   if(dispersing){
+    const progress=easeIn(disperseProgress);
+    particle.x=particle.tx+(particle.ex-particle.tx)*progress;
+    particle.y=particle.ty+(particle.ey-particle.ty)*progress;
+    context.globalAlpha=.96*(1-progress);
+   }else{
+    const progress=easeInOut(forming);
+    const floatX=Math.sin(time*.0011+particle.seed)*1.35*progress;
+    const floatY=Math.cos(time*.0009+particle.seed)*1.15*progress;
+    particle.x=particle.sx+(particle.tx-particle.sx)*progress+floatX;
+    particle.y=particle.sy+(particle.ty-particle.sy)*progress+floatY;
+    context.globalAlpha=.13+.85*progress;
+   }
+   context.fillStyle=particle.color;
+   const sparkle=.72+.28*Math.sin(time*.003+particle.seed);
+   const size=particle.size*sparkle;
+   context.fillRect(particle.x,particle.y,size,size);
+  });
+  context.shadowBlur=0;
+  context.globalCompositeOperation='source-over';
+  context.globalAlpha=1;
+  particleAnimationFrame=requestAnimationFrame(animate);
+ };
+
+ particleResizeHandler=resize;
+ window.addEventListener('resize',particleResizeHandler);
+ window.addEventListener('orientationchange',particleResizeHandler);
+ if(window.visualViewport)window.visualViewport.addEventListener('resize',particleResizeHandler);
+ particleAnimationFrame=requestAnimationFrame(animate);
+}
+// Procedural golf soundscape. No external audio files or network required.
+const golfAudio=(()=>{
+ let ctx,master,ambientTimer=null,ambientNoise=null;
+ const active=()=>ctx&&ctx.state==='running';
+ function noiseBuffer(seconds=1){const n=Math.ceil(ctx.sampleRate*seconds),b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;return b}
+ function start(){try{if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=.72;master.connect(ctx.destination);const wind=ctx.createBufferSource();wind.buffer=noiseBuffer(4);wind.loop=true;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=340;const g=ctx.createGain();g.gain.value=.013;wind.connect(filter);filter.connect(g);g.connect(master);wind.start();ambientNoise=wind;}ctx.resume()}catch(e){console.warn('Ljud kunde inte startas',e)}}
+
+
+ function burst(t,d,vol,cutoff){const src=ctx.createBufferSource(),fil=ctx.createBiquadFilter(),g=ctx.createGain();src.buffer=noiseBuffer(Math.max(.15,d+.05));fil.type='bandpass';fil.frequency.value=cutoff;fil.Q.value=.7;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);src.connect(fil);fil.connect(g);g.connect(master);src.start(t);src.stop(t+d+.025)}
+ function strike(){if(!active())return;const t=ctx.currentTime;burst(t,.14,.34,1600);const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.setValueAtTime(260,t);o.frequency.exponentialRampToValueAtTime(105,t+.15);g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.0001,t+.19);o.connect(g);g.connect(master);o.start(t);o.stop(t+.2)}
+ function applause(){if(!active())return;const t=ctx.currentTime+.12;for(let i=0;i<45;i++){const time=t+Math.random()*2.9;burst(time,.045+Math.random()*.07,.035+Math.random()*.055,850+Math.random()*1400)}}
+ document.addEventListener('visibilitychange',()=>{if(ctx){if(document.hidden)ctx.suspend();else ctx.resume()}});
+ return {start,strike,applause};
+})();
+
+function shoot(){if(playing||holing||aimPower<.08)return;shotCount++;golfAudio.strike();updateShot();hideShotGraphics();shotPeak=0;velocity.copy(aimDir).multiplyScalar(aimPower*72);playing=true;shotTimer=0;flightTime=0;if(shotCount===1){flightDuration=1.3+aimPower*.85;flightHeight=4+aimPower*13;flightStart=ballPos.clone();}else{flightDuration=0;flightHeight=0;}$('speedBox').style.display='block';aimPower=0;$('power').firstElementChild.style.width='0%';setSwingMeter(0);const tee=scene.getObjectByName('tee');if(tee)tee.visible=false}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);frame+=dt;clouds.forEach(c=>c.position.x+=dt*.24);leaves.forEach(l=>l.group.rotation.z=Math.sin(frame*.65+l.phase)*l.sway);if(hole===2){const st=scene.children.find(o=>o.userData&&o.userData.stars);if(st)st.material.opacity=.78+.13*Math.sin(frame*.65)}if(flag){let p=flag.geometry.attributes.position;for(let i=0;i<p.count;i++){let x=p.getX(i);p.setZ(i,(Math.sin(frame*1.45+x*1.55)*.13+Math.sin(frame*.73+x*.8)*.045)*(x+2)/4)}p.needsUpdate=true;flag.geometry.computeVertexNormals()}if(holing){holeAnimation+=dt;const t=Math.min(1,holeAnimation/1.05),eased=t*t*(3-2*t),start=holeStart||ballPos,cupX=greenCenterX();ball.position.set(THREE.MathUtils.lerp(start.x,cupX,eased),THREE.MathUtils.lerp(start.y,height(cupX,-210)+.43,eased)-.72*Math.max(0,(t-.42)/.58),THREE.MathUtils.lerp(start.z,-210,eased));ball.scale.setScalar(1-.93*Math.max(0,(t-.4)/.6));if(holeAnimation>2.0){holing=false;finishHole()}}
+if(playing){// The ball subtly follows the terrain gradient rather than rolling on a flat plane.
+const slopeX=(height(ballPos.x+.7,ballPos.z)-height(ballPos.x-.7,ballPos.z))/1.4;
+const slopeZ=(height(ballPos.x,ballPos.z+.7)-height(ballPos.x,ballPos.z-.7))/1.4;
+velocity.x-=slopeX*3.2*dt;velocity.z-=slopeZ*3.2*dt;
+const previousBall=ballPos.clone();ballPos.addScaledVector(velocity,dt);velocity.multiplyScalar(Math.exp(-.55*dt));ballPos.y=height(ballPos.x,ballPos.z)+.43;if(flightDuration>0&&flightTime<flightDuration){flightTime+=dt;const phase=Math.min(1,flightTime/flightDuration);ballPos.y+=Math.sin(Math.PI*phase)*flightHeight;}ball.position.copy(ballPos);updateDistance();traceClock+=dt;if(traceClock>.025){traceClock=0;updateTracer()}updateSpeed();ball.rotation.x+=velocity.length()*dt/.42;const sh=scene.getObjectByName('ballShadow');if(sh){sh.position.x=ballPos.x;sh.position.z=ballPos.z;sh.position.y=height(ballPos.x,ballPos.z)+.04}// Only count a hole when the ball actually reaches the cup at putting speed.
+const cupX=greenCenterX(),cupZ=-210;
+const vx=ballPos.x-previousBall.x,vz=ballPos.z-previousBall.z;
+const u=Math.max(0,Math.min(1,((cupX-previousBall.x)*vx+(cupZ-previousBall.z)*vz)/(vx*vx+vz*vz||1)));
+const closestX=previousBall.x+vx*u,closestZ=previousBall.z+vz*u;
+const cupDistance=Math.hypot(closestX-cupX,closestZ-cupZ);
+if(cupDistance<2.3 && velocity.length()<16){playing=false;hideShotGraphics();holing=true;holeAnimation=0;holeStart=ballPos.clone();velocity.set(0,0,0);const shadow=scene.getObjectByName('ballShadow');if(shadow)shadow.visible=false}
+else if(velocity.length()<1.2){
+  if(Math.hypot(ballPos.x-cupX,ballPos.z+210)<2.9){
+    playing=false;hideShotGraphics();holing=true;holeAnimation=0;holeStart=ballPos.clone();velocity.set(0,0,0);
+    const shadow=scene.getObjectByName('ballShadow');if(shadow)shadow.visible=false;
+  }else{playing=false;hideShotGraphics();updateSpeed()}
+}}// Always face the flag, including after the ball rolls beyond the cup.
+const targetX=greenCenterX(),flagTarget=new THREE.Vector3(targetX,height(targetX,-210)+(holing?2.8+Math.min(1,holeAnimation/1.3)*2:2.8),-210);
+const towardFlag=new THREE.Vector3().subVectors(flagTarget,ballPos);towardFlag.y=0;
+if(towardFlag.lengthSq()<.01)towardFlag.set(0,0,-1);
+towardFlag.normalize();
+// Stand a little behind the ball relative to the flag, never on top of it.
+const desired=ballPos.clone().addScaledVector(towardFlag,-10);
+desired.y=height(desired.x,desired.z)+3.5+(holing?Math.min(1,holeAnimation/1.3)*5:0);
+camera.position.lerp(desired,Math.min(1,dt*2.4));
+// Smoothly rotate instead of snapping when crossing the flag.
+const forward=new THREE.Vector3().subVectors(flagTarget,camera.position).normalize();
+const targetQuat=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(camera.position,flagTarget,new THREE.Vector3(0,1,0)));
+camera.quaternion.slerp(targetQuat,Math.min(1,dt*3));
+renderer.render(scene,camera)}
+function pointerPos(e){const r=renderer.domElement.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}function ballScreen(){const v=ball.position.clone().project(camera);return{x:(v.x+1)*innerWidth/2,y:(1-v.y)*innerHeight/2}}
+function setSwingMeter(value){const pct=Math.round(Math.max(0,Math.min(1,value))*100);$("swingMeterFill").style.width=pct+"%";$("swingMeterValue").textContent=pct+"%";$("swingMeter").classList.toggle("active",pct>0)}function down(e){if($('overlay').style.display!=='none'||playing||holing||$('finalResults').style.display==='block'||$('codeGate').style.display==='flex'||$('fatherMessage').style.display==='flex')return;let p=pointerPos(e),b=ballScreen();drag=p;aimPower=0;try{renderer.domElement.setPointerCapture(e.pointerId)}catch(_){}}function move(e){if(!drag)return;const p=pointerPos(e),dx=p.x-drag.x,dy=p.y-drag.y;aimPower=Math.min(1,Math.hypot(dx,dy)/(innerWidth<650?Math.max(105,Math.min(150,innerHeight*.22)):175));const towardFlag=new THREE.Vector3(greenCenterX()-ballPos.x,0,-210-ballPos.z).normalize();const right=new THREE.Vector3(-towardFlag.z,0,towardFlag.x);aimDir.copy(towardFlag).multiplyScalar(Math.max(12,dy)/120).addScaledVector(right,-dx/160).normalize();$('power').firstElementChild.style.width=(aimPower*100)+'%';setSwingMeter(aimPower)}function up(e){if(!drag)return;const p=pointerPos(e);if(Math.hypot(p.x-drag.x,p.y-drag.y)<12){drag=null;aimPower=0;setSwingMeter(0);return;}if(aimPower<.08){const dx=p.x-drag.x,dy=p.y-drag.y;aimPower=Math.min(1,Math.hypot(dx,dy)/(innerWidth<650?Math.max(105,Math.min(150,innerHeight*.22)):175));const towardFlag=new THREE.Vector3(greenCenterX()-ballPos.x,0,-210-ballPos.z).normalize();const right=new THREE.Vector3(-towardFlag.z,0,towardFlag.x);aimDir.copy(towardFlag).multiplyScalar(Math.max(12,dy)/120).addScaledVector(right,-dx/160).normalize()}drag=null;shoot();setSwingMeter(0)}
+function score(){const rows=names.map((n,i)=>`<tr><td>${n}</td><td>${pars[i]}</td><td>${finished[i]??(i===hole?shotCount:'—')}</td></tr>`).join('');$('scoreRows').innerHTML=rows;$('totalScore').textContent='Totalt: '+finished.reduce((a,v)=>a+(v||0),0)+' avslutade slag';$('score').style.display='block'}
+$('scoreBtn').onclick=score;
+$('closeScore').onclick=()=>$('score').style.display='none';
+$('playAgain').onclick=()=>location.reload();
+$('finalNext').onclick=openCodeGate;
+$('replayGreeting').onclick=startParticleGreeting;
+$('returnToStart').onclick=()=>location.reload();
+$('codeBack').onclick=closeCodeGate;
+$('codeUnlock').onclick=checkAccessCode;
+$('codeInput').addEventListener('input',event=>{
+ event.currentTarget.value=event.currentTarget.value.toUpperCase();
+ $('codeError').textContent='';
+});
+$('codeInput').addEventListener('keydown',event=>{
+ if(event.key==='Enter')checkAccessCode();
+ if(event.key==='Escape')closeCodeGate();
+});
+$('continueBtn').onclick=()=>{const value=$('playerNameInput').value.trim().toUpperCase();if(!value){$('nameError').textContent='Skriv ditt namn för att börja.';$('playerNameInput').focus();return;}golfAudio.start();playerName=value;$('playerBadge').textContent=value;createRivals();renderBoard();$('nameStep').style.display='none';$('overlay').style.display='none';setTimeout(()=>{$('instructions').classList.add('instructionsGone');$('extraControls').classList.add('controlsRevealed')},14000)};
+function uppercasePlayerName(event) {
+  if (event.isComposing) return;
+  const input = event.currentTarget;
+  const value = input.value;
+  const uppercase = value.toUpperCase();
+  if (value === uppercase) return;
+  const start = value.slice(0, input.selectionStart).toUpperCase().length;
+  const end = value.slice(0, input.selectionEnd).toUpperCase().length;
+  const direction = input.selectionDirection;
+  input.value = uppercase;
+  input.setSelectionRange(start, end, direction);
+}
+$('playerNameInput').addEventListener('input', uppercasePlayerName);
+$('playerNameInput').addEventListener('compositionend', uppercasePlayerName);
+$('playerNameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.isComposing) $('continueBtn').click();
+});init();renderer.domElement.style.touchAction='none';renderer.domElement.addEventListener('pointerdown',down);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',()=>{drag=null;setSwingMeter(0)});
+</script></body></html>
